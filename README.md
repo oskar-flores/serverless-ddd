@@ -151,7 +151,73 @@ The application uses EventBridge for communication between bounded contexts:
 
 The application follows a serverless architecture with clear boundaries between different bounded contexts. Each bounded context has its own data store and API endpoints, and they communicate with each other through events.
 
-![Architecture Diagram](https://via.placeholder.com/800x400?text=Travier+Architecture+Diagram)
+```mermaid
+graph TD
+    %% Client and API Gateway
+    Client[Client] --> APIGateway[API Gateway]
+
+    %% Bounded Contexts
+    subgraph "Booking Context"
+        %% Layers
+        subgraph "Infrastructure Layer"
+            BookingHandlers[Lambda Handlers]
+            BookingRepo[DynamoDB Repository]
+        end
+
+        subgraph "Application Layer"
+            BookingUseCases[Use Cases]
+        end
+
+        subgraph "Domain Layer"
+            BookingModels[Domain Models]
+            BookingEvents[Domain Events]
+        end
+
+        %% Connections within Booking Context
+        BookingHandlers --> BookingUseCases
+        BookingUseCases --> BookingModels
+        BookingUseCases --> BookingEvents
+        BookingUseCases --> BookingRepo
+        BookingRepo --> BookingModels
+    end
+
+    subgraph "Payment Context"
+        %% Layers
+        subgraph "Infrastructure Layer"
+            PaymentHandlers[Lambda Handlers]
+            PaymentRepo[DynamoDB Repository]
+        end
+
+        subgraph "Application Layer"
+            PaymentUseCases[Use Cases]
+        end
+
+        subgraph "Domain Layer"
+            PaymentModels[Domain Models]
+            PaymentEvents[Domain Events]
+        end
+
+        %% Connections within Payment Context
+        PaymentHandlers --> PaymentUseCases
+        PaymentUseCases --> PaymentModels
+        PaymentUseCases --> PaymentEvents
+        PaymentUseCases --> PaymentRepo
+        PaymentRepo --> PaymentModels
+    end
+
+    %% EventBridge for communication between contexts
+    EventBridge[Amazon EventBridge]
+
+    %% Connections to/from API Gateway
+    APIGateway --> BookingHandlers
+    APIGateway --> PaymentHandlers
+
+    %% Event-driven communication
+    BookingEvents --> EventBridge
+    EventBridge --> PaymentUseCases
+    PaymentEvents --> EventBridge
+    EventBridge --> BookingUseCases
+```
 
 ## Web Application
 
@@ -197,6 +263,30 @@ npm run build:webapp
 ```
 
 The built files will be available in the `src/webapp/dist` directory.
+
+## Web Application Screenshots
+
+Here are some screenshots of the Travier Plane Ticketing Service web application:
+
+### Home Page
+![Home Page](images/home_page.png)
+*The home page provides an overview of the service and quick links to main features.*
+
+### Booking Page
+![Booking Page](images/booking_page.png)
+*The booking page allows users to reserve a new ticket by entering flight and passenger details.*
+
+### Check-in Page
+![Check-in Page](images/checkin_page.png)
+*The check-in page allows users to check in for their flights using ticket information.*
+
+### Payment Page
+![Payment Page](images/payment_page.png)
+*The payment page allows users to process payments for their tickets.*
+
+### Payment History
+![Payment History](images/payment_history.png)
+*The payment history page allows users to view their payment history.*
 
 ## License
 
