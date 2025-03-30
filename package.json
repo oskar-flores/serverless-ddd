@@ -1,0 +1,42 @@
+{
+  "name": "plane-ticketing-service",
+  "version": "1.0.0",
+  "description": "A serverless plane ticketing service using DDD principles",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "cdk": "cdk",
+    "deploy": "npm run build && cdk deploy --all",
+    "deploy:shared": "npm run build && cdk deploy TravierSharedInfrastructure",
+    "deploy:booking": "npm run build && cdk deploy TravierBooking",
+    "deploy:payment": "npm run build && cdk deploy TravierPayment",
+    "start:webapp": "vite --config src/webapp/vite.config.ts",
+    "build:webapp": "vite build --config src/webapp/vite.config.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-eventbridge": "^3.0.0",
+    "@aws-sdk/util-dynamodb": "^3.0.0",
+    "aws-cdk-lib": "^2.0.0",
+    "axios": "^1.4.0",
+    "constructs": "^10.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.0",
+    "@types/node": "^18.0.0",
+    "@types/react": "^18.2.12",
+    "@types/react-dom": "^18.2.5",
+    "@types/uuid": "^9.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "testcontainers": "^10.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^4.3.9",
+    "vitest": "^0.34.0"
+  }
+}
