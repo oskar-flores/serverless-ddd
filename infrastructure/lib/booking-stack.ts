@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as path from 'path';
@@ -36,40 +37,76 @@ export class BookingStack extends cdk.Stack {
     });
 
     // Create Lambda functions for Booking use cases
-    const reserveTicketLambda = new lambda.Function(this, 'ReserveTicketFunction', {
+    const reserveTicketLambda = new NodejsFunction(this, 'ReserveTicketFunction', {
       functionName: 'ReserveTicket',
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'context/booking/infrastructure/adapters/handlers/ReserveTicketHandler.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../../dist')),
+      entry: path.join(__dirname, '../../../context/booking/infrastructure/adapters/handlers/ReserveTicketHandler.ts'),
+      handler: 'handler',
+      memorySize: 1024, // Increased memory for faster execution
       environment: {
         TICKETS_TABLE_NAME: ticketsTable.tableName,
         EVENT_BUS_NAME: props.eventBus.eventBusName
       },
-      timeout: cdk.Duration.seconds(30)
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        bundleAwsSDK: true, // Bundle AWS SDK to reduce cold start time
+        format: OutputFormat.ESM, // Use ESM format for better tree-shaking
+        banner: "const require = (await import('node:module')).createRequire(import.meta.url);", // For mixing CJS and ESM libs
+        mainFields: ['main', 'module'],
+        buildArgs: {
+          '--tree-shaking': 'true',
+        },
+      }
     });
 
-    const checkInTicketLambda = new lambda.Function(this, 'CheckInTicketFunction', {
+    const checkInTicketLambda = new NodejsFunction(this, 'CheckInTicketFunction', {
       functionName: 'CheckInTicket',
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'context/booking/infrastructure/adapters/handlers/CheckInTicketHandler.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../../dist')),
+      entry: path.join(__dirname, '../../../context/booking/infrastructure/adapters/handlers/CheckInTicketHandler.ts'),
+      handler: 'handler',
+      memorySize: 1024, // Increased memory for faster execution
       environment: {
         TICKETS_TABLE_NAME: ticketsTable.tableName,
         EVENT_BUS_NAME: props.eventBus.eventBusName
       },
-      timeout: cdk.Duration.seconds(30)
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        bundleAwsSDK: true, // Bundle AWS SDK to reduce cold start time
+        format: OutputFormat.ESM, // Use ESM format for better tree-shaking
+        banner: "const require = (await import('node:module')).createRequire(import.meta.url);", // For mixing CJS and ESM libs
+        mainFields: ['main', 'module'],
+        buildArgs: {
+          '--tree-shaking': 'true',
+        },
+      }
     });
 
-    const cancelTicketLambda = new lambda.Function(this, 'CancelTicketFunction', {
+    const cancelTicketLambda = new NodejsFunction(this, 'CancelTicketFunction', {
       functionName: 'CancelTicket',
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'context/booking/infrastructure/adapters/handlers/CancelTicketHandler.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../../dist')),
+      entry: path.join(__dirname, '../../../context/booking/infrastructure/adapters/handlers/CancelTicketHandler.ts'),
+      handler: 'handler',
+      memorySize: 1024, // Increased memory for faster execution
       environment: {
         TICKETS_TABLE_NAME: ticketsTable.tableName,
         EVENT_BUS_NAME: props.eventBus.eventBusName
       },
-      timeout: cdk.Duration.seconds(30)
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        bundleAwsSDK: true, // Bundle AWS SDK to reduce cold start time
+        format: OutputFormat.ESM, // Use ESM format for better tree-shaking
+        banner: "const require = (await import('node:module')).createRequire(import.meta.url);", // For mixing CJS and ESM libs
+        mainFields: ['main', 'module'],
+        buildArgs: {
+          '--tree-shaking': 'true',
+        },
+      }
     });
 
     // Grant permissions to Lambda functions

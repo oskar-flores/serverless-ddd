@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
@@ -31,28 +32,52 @@ export class PaymentStack extends cdk.Stack {
     });
 
     // Create Lambda functions for Payment use cases
-    const processPaymentLambda = new lambda.Function(this, 'ProcessPaymentFunction', {
+    const processPaymentLambda = new NodejsFunction(this, 'ProcessPaymentFunction', {
       functionName: 'ProcessPayment',
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'context/payment/infrastructure/adapters/handlers/ProcessPaymentHandler.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../../dist')),
+      entry: path.join(__dirname, '../../../context/payment/infrastructure/adapters/handlers/ProcessPaymentHandler.ts'),
+      handler: 'handler',
+      memorySize: 1024, // Increased memory for faster execution
       environment: {
         PAYMENTS_TABLE_NAME: paymentsTable.tableName,
         EVENT_BUS_NAME: props.eventBus.eventBusName
       },
-      timeout: cdk.Duration.seconds(30)
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        bundleAwsSDK: true, // Bundle AWS SDK to reduce cold start time
+        format: OutputFormat.ESM, // Use ESM format for better tree-shaking
+        banner: "const require = (await import('node:module')).createRequire(import.meta.url);", // For mixing CJS and ESM libs
+        mainFields: ['main', 'module'],
+        buildArgs: {
+          '--tree-shaking': 'true',
+        },
+      }
     });
 
-    const issueRefundLambda = new lambda.Function(this, 'IssueRefundFunction', {
+    const issueRefundLambda = new NodejsFunction(this, 'IssueRefundFunction', {
       functionName: 'IssueRefund',
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'context/payment/infrastructure/adapters/handlers/IssueRefundHandler.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../../dist')),
+      entry: path.join(__dirname, '../../../context/payment/infrastructure/adapters/handlers/IssueRefundHandler.ts'),
+      handler: 'handler',
+      memorySize: 1024, // Increased memory for faster execution
       environment: {
         PAYMENTS_TABLE_NAME: paymentsTable.tableName,
         EVENT_BUS_NAME: props.eventBus.eventBusName
       },
-      timeout: cdk.Duration.seconds(30)
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        bundleAwsSDK: true, // Bundle AWS SDK to reduce cold start time
+        format: OutputFormat.ESM, // Use ESM format for better tree-shaking
+        banner: "const require = (await import('node:module')).createRequire(import.meta.url);", // For mixing CJS and ESM libs
+        mainFields: ['main', 'module'],
+        buildArgs: {
+          '--tree-shaking': 'true',
+        },
+      }
     });
 
     // Grant permissions to Lambda functions
@@ -96,17 +121,24 @@ export class PaymentStack extends cdk.Stack {
 
     // We could add a Lambda function here to handle the TicketReserved event and initiate payment
     // For now, we'll just log the event
-    const logTicketReservedLambda = new lambda.Function(this, 'LogTicketReservedFunction', {
+    const logTicketReservedLambda = new NodejsFunction(this, 'LogTicketReservedFunction', {
       functionName: 'LogTicketReserved',
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromInline(`
-        exports.handler = async (event) => {
-          console.log('TicketReserved event received:', JSON.stringify(event, null, 2));
-          return { statusCode: 200, body: 'Event logged' };
-        };
-      `),
-      timeout: cdk.Duration.seconds(30)
+      entry: path.join(__dirname, '../../../context/payment/infrastructure/adapters/handlers/LogTicketReservedHandler.ts'),
+      handler: 'handler',
+      memorySize: 1024, // Increased memory for faster execution
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        bundleAwsSDK: true, // Bundle AWS SDK to reduce cold start time
+        format: OutputFormat.ESM, // Use ESM format for better tree-shaking
+        banner: "const require = (await import('node:module')).createRequire(import.meta.url);", // For mixing CJS and ESM libs
+        mainFields: ['main', 'module'],
+        buildArgs: {
+          '--tree-shaking': 'true',
+        },
+      }
     });
 
     ticketReservedRule.addTarget(new targets.LambdaFunction(logTicketReservedLambda));
@@ -123,17 +155,24 @@ export class PaymentStack extends cdk.Stack {
 
     // We could add a Lambda function here to handle the TicketCancelled event and initiate refund
     // For now, we'll just log the event
-    const logTicketCancelledLambda = new lambda.Function(this, 'LogTicketCancelledFunction', {
+    const logTicketCancelledLambda = new NodejsFunction(this, 'LogTicketCancelledFunction', {
       functionName: 'LogTicketCancelled',
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromInline(`
-        exports.handler = async (event) => {
-          console.log('TicketCancelled event received:', JSON.stringify(event, null, 2));
-          return { statusCode: 200, body: 'Event logged' };
-        };
-      `),
-      timeout: cdk.Duration.seconds(30)
+      entry: path.join(__dirname, '../../../context/payment/infrastructure/adapters/handlers/LogTicketCancelledHandler.ts'),
+      handler: 'handler',
+      memorySize: 1024, // Increased memory for faster execution
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        bundleAwsSDK: true, // Bundle AWS SDK to reduce cold start time
+        format: OutputFormat.ESM, // Use ESM format for better tree-shaking
+        banner: "const require = (await import('node:module')).createRequire(import.meta.url);", // For mixing CJS and ESM libs
+        mainFields: ['main', 'module'],
+        buildArgs: {
+          '--tree-shaking': 'true',
+        },
+      }
     });
 
     ticketCancelledRule.addTarget(new targets.LambdaFunction(logTicketCancelledLambda));

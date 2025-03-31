@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { SharedInfrastructureStack } from './shared-infrastructure-stack';
-import { BookingStack } from './booking-stack';
-import { PaymentStack } from './payment-stack';
+import { SharedInfrastructureStack } from '../lib/shared-infrastructure-stack';
+import { BookingStack } from '../lib/booking-stack';
+import { PaymentStack } from '../lib/payment-stack';
 
 const app = new cdk.App();
 

@@ -5,10 +5,8 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "lib": ["ES2022", "DOM"],
-    "jsx": "react-jsx",
 
     /* Project Structure */
-    "rootDir": "./src",
     "outDir": "./dist",
 
     /* Module Resolution */
@@ -44,6 +42,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "bin/**/*", "lib/**/*"],
   "exclude": ["node_modules", "dist"]
 }
